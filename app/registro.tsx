@@ -1,34 +1,43 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, KeyboardAvoidingView, TouchableOpacity, ImageBackground } from 'react-native';
+import { StyleSheet, ImageBackground, KeyboardAvoidingView, TouchableOpacity, View } from 'react-native';
 import { TextInput, Button, Card, Text, Title } from 'react-native-paper';
 import { useRouter, Stack } from 'expo-router';
 import { MotiView } from 'moti';
 import { api } from '../services/api';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const router = useRouter();
   const [correo, setCorreo] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmar, setConfirmar] = useState('');
   const [loading, setLoading] = useState(false);
 
   const isValidEmail = (email: string) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleLogin = async () => {
-    if (!correo || !password) {
-      return alert('¡Oye, pequeño soñador! No dejes los campos vacíos, ¿vale?');
+  const handleRegister = async () => {
+    if (!correo || !password || !confirmar) {
+      return alert('¡Oye, ingeniero! Llena todos los campos, ¿sí?');
     }
 
+    if (password !== confirmar) {
+      return alert('¡Ups! Las contraseñas no se dan un besito, no coinciden.');
+    }
+    
     if (!isValidEmail(correo)) {
-      return alert('¡Ese correo parece un chiste mal escrito! Pon uno de verdad.');
+      return alert('¡Ese correo parece un unicornio perdido! Usa uno válido.');
+    }
+
+    if (password.length < 8) {
+      return alert('¡Vamos, dale más amor! La contraseña necesita 8 caracteres o más.');
     }
 
     setLoading(true);
     try {
-      await api.login(correo, password);
-      router.replace('/inicio');
+      await api.register(correo, password);
+      router.replace('/');
     } catch (error) {
-      alert('¡Ups! El usuario o la contraseña están jugando al escondite.');
+      alert('¡Ay, ay, ay! Algo salió mal al registrarte, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -39,18 +48,18 @@ export default function LoginScreen() {
       <Stack.Screen options={{ headerShown: false }} />
       <ImageBackground
         style={styles.background}
-        blurRadius={3}
+        blurRadius={4}
       >
         <KeyboardAvoidingView behavior="padding" style={styles.overlay}>
           <MotiView
-            from={{ opacity: 0, translateY: 50 }}
+            from={{ opacity: 0, translateY: 60 }}
             animate={{ opacity: 1, translateY: 0 }}
             transition={{ type: 'timing', duration: 800 }}
           >
             <Card style={styles.card}>
               <Card.Content>
-                <Title style={styles.title}>Bienvenido a tus notas</Title>
-                <Text style={styles.subtitle}>Explora tus ideas</Text>
+                <Title style={styles.title}>Únete a la Aventura</Title>
+                <Text style={styles.subtitle}>Regístrate para agregar notas</Text>
 
                 <TextInput
                   label="Correo electrónico"
@@ -67,20 +76,27 @@ export default function LoginScreen() {
                   secureTextEntry
                   style={styles.input}
                 />
+                <TextInput
+                  label="Confirmar contraseña"
+                  value={confirmar}
+                  onChangeText={setConfirmar}
+                  secureTextEntry
+                  style={styles.input}
+                />
 
                 <Button
                   mode="contained"
-                  onPress={handleLogin}
+                  onPress={handleRegister}
                   loading={loading}
                   disabled={loading}
                   style={styles.button}
                   labelStyle={{ fontWeight: 'bold' }}
                 >
-                  Iniciar sesión
+                  Registrarse
                 </Button>
 
-                <TouchableOpacity onPress={() => router.replace('/registro')}>
-                  <Text style={styles.link}>¿Eres nuevo? <Text style={{ fontWeight: 'bold' }}>Crear cuenta</Text></Text>
+                <TouchableOpacity onPress={() => router.replace('/')}>
+                  <Text style={styles.link}>¿Tiene una cuenta? <Text style={{ fontWeight: 'bold' }}>Inicia sesión</Text></Text>
                 </TouchableOpacity>
               </Card.Content>
             </Card>
@@ -92,35 +108,40 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+ 
   background: {
     flex: 1,
     resizeMode: 'cover',
     backgroundColor: '#FF69B4', 
   },
+
   overlay: {
     flex: 1,
     justifyContent: 'center',
     padding: 24,
   },
+
   card: {
     borderRadius: 24,
     elevation: 10,
     padding: 20,
     backgroundColor: '#FFF0F5', 
   },
+
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '900',
     textAlign: 'center',
     marginBottom: 4,
     color: '#C71585', 
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
     color: '#FF1493', 
   },
+
   input: {
     marginVertical: 8,
     padding: 12,
@@ -133,9 +154,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#FF69B4', 
   },
+
   link: {
     marginTop: 16,
     textAlign: 'center',
     color: '#FF1493', 
+    fontSize: 14,
   },
 });

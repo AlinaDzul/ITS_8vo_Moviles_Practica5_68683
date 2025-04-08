@@ -21,11 +21,11 @@ export default function CreateNoteScreen() {
 
   useEffect(() => {
     if (id) {
-      // Modo edición: cargar la nota existente
+      // Edit mode
       const noteId = Number(id);
       const noteToEdit = notes.find(note => note.id === noteId);
       if (noteToEdit) {
-        console.log('Nota a editar:', noteToEdit.descripcion);
+        console.log('Note to edit:', noteToEdit.descripcion);
         setTitle(noteToEdit.titulo);
         setContent(noteToEdit.descripcion);
         setCompleted(noteToEdit.completada);
@@ -34,31 +34,37 @@ export default function CreateNoteScreen() {
     }
   }, [id, notes]);
 
+  const stripHtml = (html: string): string => {
+    return html.replace(/<[^>]*>/g, '');
+  };
+  
   const handleSave = async () => {
     if (!title.trim()) {
-      alert('Por favor ingresa un título para la nota');
+      alert('Por favor, ingrese un título para su nota.');
       return;
     }
-
+  
+    const cleanContent = stripHtml(content); // Clean content
+    console.log('Retrieved content:', cleanContent);
+  
     try {
       if (id) {
-        // Modo edición
+        // Edit mode
         await updateNote(Number(id), { 
           titulo: title, 
-          descripcion: content,
+          descripcion: cleanContent, 
           completada: completed
         });
       } else {
-        // Modo creación
         await saveNote({
           titulo: title.trim(),
-          descripcion: content,
+          descripcion: cleanContent, 
           completada: completed
         });
       }
       router.back();
     } catch (error) {
-      alert('Error al guardar la nota');
+      alert('Lo sentimos, ocurrió un error al guardar la nota.');
       console.error(error);
     }
   };
@@ -71,7 +77,7 @@ export default function CreateNoteScreen() {
       >
         <TextInput
           style={styles.titleInput}
-          placeholder="Título de la nota"
+          placeholder="Título de su nota"
           placeholderTextColor="#999"
           value={title}
           onChangeText={setTitle}
@@ -82,14 +88,14 @@ export default function CreateNoteScreen() {
           style={styles.editor}
           initialContentHTML={content}
           onChange={setContent}
-          placeholder="Escribe el contenido de tu nota aquí..."
+          placeholder="Escriba el contenido de su nota aquí..."
           useContainer={true}
         />
 
         <RichToolbar
           editor={richText}
-          selectedIconTint="#873c1e"
-          iconTint="#312921"
+          selectedIconTint="#C71585" // Medium Violet Red
+          iconTint="#4A2A3C" 
           scalesPageToFit={Platform.OS === 'android'}
           actions={[
             actions.setBold,
@@ -124,7 +130,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 0,
-    paddingHorizontal: 4
+    paddingHorizontal: 4,
+    backgroundColor: '#FFF0F5', 
   },
   header: {
     flexDirection: 'row',
@@ -132,7 +139,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#FFD1DC', 
   },
   formContainer: {
     flex: 1,
@@ -140,36 +147,40 @@ const styles = StyleSheet.create({
   },
   titleInput: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: '600', 
     marginVertical: 15,
-    color: '#000',
+    color: '#4A2A3C', 
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#FF69B4', 
   },
   editor: {
+    backgroundColor: '#FFFFFF', 
     flex: 1,
     minHeight: 300,
     borderWidth: 1,
-    borderColor: '#eee',
-    borderRadius: 5,
-    padding: 10,
+    borderColor: '#FFD1DC', 
+    borderRadius: 8,
+    padding: 12,
     marginBottom: 10,
   },
   toolbar: {
-    backgroundColor: '#f5f5f5',
-    borderColor: '#eee',
+    backgroundColor: '#FFE4E1', 
+    borderColor: '#FFD1DC', 
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 8,
     marginBottom: 20,
   },
   fab: {
     position: 'absolute',
     right: 20,
     bottom: 20,
-    backgroundColor: '#6200ee',
+    backgroundColor: '#C71585', 
     width: 56,
     height: 56,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
+    elevation: 6, 
   },
 });
